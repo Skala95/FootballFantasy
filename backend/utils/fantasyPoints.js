@@ -128,7 +128,104 @@ export const updatePlayerStats = async (match) => {
                 losses: loss,
                 draws: draw,
                 totalPoints: pts
+            },
+            $push: {
+                matchStats: {match: match._id, goals, assists, ownGoals, win, loss, draw, points: pts }
             }
         });
     }
 };
+
+export const recalculateStats = async (match) => {
+    const { Player } = await import('../models/playerModel.js');
+    const {winnerTeam} = getMatchResult(match);
+        const allPlayers = [
+            ...match.team1.map(p => ({ player: p, team: 'team1' })),
+            ...match.team2.map(p => ({ player: p, team: 'team2' }))
+        ];
+
+    for (const { player, team } of allPlayers) {
+        const playerId = (player._id || player).toString();
+
+        const goals = match.stats.filter(s =>
+            (s.player?._id || s.player).toString() === playerId && s.stats === 'goal'
+        ).length;
+        const assists = match.stats.filter(s =>
+            (s.player?._id || s.player).toString() === playerId && s.stats === 'assist'
+        ).length;
+        const ownGoals = match.stats.filter(s =>
+            (s.player?._id || s.player).toString() === playerId && s.stats === 'ownGoal'
+        ).length;
+
+        let win = 0, loss = 0, draw = 0;
+        if (winnerTeam === null) draw = 1;
+        else if (winnerTeam === team) win = 1;
+        else loss = 1;  
+
+        let pts = 1 + win * 3 + goals * 5 + assists * 2 - ownGoals;
+
+        const player = await Player.findById(playerId);
+        if(!player) continue;
+
+        const oldStats = player.matchStats.find(ms => ms.match.toString() === match._id.toString());
+
+        const oldGoals = oldStats?.goals ?? 0;
+        const oldAssists = oldStats?.assists ?? 0;
+        const oldOwnGoals = oldStats?.ownGoals ?? 0;
+        const oldWin = oldStats?.win ?? 0;
+        const oldLoss = oldStats?.loss ?? 0;
+        const oldDraw = oldStats?.draw ?? 0;
+        const oldPoints = oldStats?.points ?? 0;
+
+
+        await Player.findByIdAndUpdate(playerId, {
+            $inc: {
+                goals: goals - oldGoals,
+                assists: assists - oldAssists,
+                ownGoals: ownGoals - oldOwnGoals,
+                wins: win - oldWin,
+                losses: loss - oldLoss,
+                draws: draw - oldDraw,
+                totalPoints: pts - oldPoints
+            },
+            $pull: {matchStats: { match: match._id }}
+        });
+
+        await Player.findByIdAndUpdate(playerId, {
+            $push: {
+                matchStats: { match: match._id, goals, assists, ownGoals, win, loss, draw, points: pts }
+            }
+        });
+    }
+    await calculateFantasyPoints(match);
+};
+
+export const removeMatchStats = async (match) => {
+    const { Player } = await import('../models/playerModel.js');
+
+    for(const p of [...match.team1, ...match.team2]) {
+        const playerId = (p._id || p).toString();
+        const player = await Player.findById(playerId);
+        if(!player) continue;
+
+        const oldStats = player.matchStats.find(ms => ms.match.toString() === match._id.toString());
+        if(!oldStats) continue;
+
+        await Player.findByIdAndUpdate(playerId, {
+            $inc: {
+                appearances: -1,
+                goals: -oldStats.goals,
+                assists: -oldStats.assists,
+                ownGoals: -oldStats.ownGoals,
+                wins: -oldStats.win,
+                losses: -oldStats.loss,
+                draws: -oldStats.draw,
+                totalPoints: -oldStats.points
+            },
+            $pull: {matchStats: { match: match._id }}
+        });
+    }
+    
+    await FantasyTeam.deleteMany({ match: match._id });  
+};
+

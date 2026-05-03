@@ -7,10 +7,10 @@ const router = express.Router();
 //Get - Dohvati sve igrace
 router.get('/', async (req, res) => {
     try {
-        const players = await Player.find();
+        const players = await Player.find({ active: { $ne: false } });
         res.status(200).json(players);
     } catch (error) {
-        res.status(500).json({ message: 'Greska na serveru' });
+        res.status(500).json({ message: 'Greška na serveru' });
     }
 });
 
@@ -22,7 +22,7 @@ router.post('/', authMiddleware, async (req, res) => {
         await newPlayer.save();
         res.status(201).json(newPlayer);
     } catch (error) {
-        res.status(500).json({ message: 'Greska na serveru' });
+        res.status(500).json({ message: 'Greška na serveru' });
     }
 });
 
@@ -31,24 +31,24 @@ router.put('/:id', authMiddleware, async (req, res) => {
     try {
         const player = await Player.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after' });
         if (!player) {
-            return res.status(404).json({ message: 'Igrac nije pronadjen' });
+            return res.status(404).json({ message: 'Igrač nije pronadjen' });
         }         
         res.status(200).json(player);
     } catch (error) {
-        res.status(500).json({ message: 'Greska na serveru' });
+        res.status(500).json({ message: 'Greška na serveru' });
     }
 });
 
 //Delete - Obrisi igraca
 router.delete('/:id', authMiddleware, async (req, res) => {
     try {
-        const player = await Player.findByIdAndDelete(req.params.id);
+        const player = await Player.findByIdAndUpdate(req.params.id, { active: false }, { returnDocument: 'after' });
         if (!player) {
-            return res.status(404).json({ message: 'Igrac nije pronadjen' });
+            return res.status(404).json({ message: 'Igrač nije pronadjen' });
         }
-        res.status(200).json({ message: 'Igrac je obrisan' });
+        res.status(200).json({ message: 'Igrač je obrisan' });
     } catch (error) {
-        res.status(500).json({ message: 'Greska na serveru' });
+        res.status(500).json({ message: 'Greška na serveru' });
     }
 });
 export default router;
