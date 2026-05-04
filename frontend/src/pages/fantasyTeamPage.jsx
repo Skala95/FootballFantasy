@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useOutletContext } from "react-router-dom";
 
 function FantasyTeamPage() {
 
@@ -17,6 +18,9 @@ function FantasyTeamPage() {
     const [openClosedId, setOpenClosedId] = useState(null);
 
     const token = localStorage.getItem("token");
+
+    const context = useOutletContext();
+    const isAdmin = context?.userData?.role === 'admin';
 
     const fetchMatches = async () => {
         const res = await axios.get("/api/matches");
@@ -136,10 +140,10 @@ function FantasyTeamPage() {
         <div className="p-8">
             <h2 className="text-3xl font-bold mb-6">Moj Fantasy Tim</h2>
             {message && <p className="text-green-600 font-semibold mb-4">{message}</p>}
-            {error && <p className="text-red-600 font-semibold mb-4">{error}</p>}
-
+            {/*{error && <p className="text-red-600 font-semibold mb-4">{error}</p>}*/}
+            {isAdmin && <p className="text-blue-600 font-semibold mb-4">Kao administrator, ne možete kreirati fantazi timove.</p>}
             {/* Otvoreni termini */}
-            <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
+            {!isAdmin && <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
                 <h3 className="text-xl font-bold mb-4">Otvoreni termini</h3>
                 {matches.length === 0 ? (
                     <p className="text-gray-600">Nema otvorenih termina</p>
@@ -169,13 +173,13 @@ function FantasyTeamPage() {
                         })}
                     </div>
                 )}
-            </div>
+            </div>}
 
             {/* Izbor igrača za otvoreni termin */}
-            {selectedMatch && (
+            {!isAdmin && selectedMatch && (
                 <div className="bg-white p-6 rounded-lg shadow-md mb-6">
                     <h3 className="text-xl font-bold mb-2">Izaberi igrače <span className="text-gray-500 text-sm">({selectedPlayers.length}/6)</span></h3>
-                    <p className="text-sm text-gray-500 mb-4">Čekiraj igrača da ga dodaš u tim. Klikni na C da postaviš kapitena.</p>
+                    <p className="text-sm text-gray-500 mb-4">Čekiraj igrače koje želiš da dodaš u tim. Klikni desno na C da postaviš kapitena.</p>
                     <table className="w-full">
                         <thead className="bg-gray-100">
                             <tr>
@@ -200,7 +204,7 @@ function FantasyTeamPage() {
                                             <button
                                                 disabled={!isSelected || viewMode}
                                                 onClick={() => setCaptain(p._id)}
-                                                className={`text-xl ${isCaptain ? 'text-yellow-500' : 'text-gray-300'} disabled:opacity-30`}>
+                                                className={`text-xl ${isCaptain ? 'text-blue-500' : 'text-gray-300'} disabled:opacity-30`}>
                                                 C
                                             </button>
                                         </td>
@@ -210,9 +214,12 @@ function FantasyTeamPage() {
                         </tbody>
                     </table>
                     {!viewMode && (
-                        <button onClick={handleSubmit} className="mt-6 bg-green-600 text-white px-6 py-2 rounded">
-                            {myTeam ? 'Ažuriraj tim' : 'Prijavi tim'}
-                        </button>
+                        <div className="mt-6 flex items-center gap-4">
+                            <button onClick={handleSubmit} className="mt-6 bg-green-600 text-white px-6 py-2 rounded">
+                                {myTeam ? 'Ažuriraj tim' : 'Prijavi tim'}
+                            </button>
+                            {error && <p className="text-red-600 font-semibold">{error}</p>}
+                        </div>
                     )}
                 </div>
             )}

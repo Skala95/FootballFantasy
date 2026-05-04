@@ -62,10 +62,11 @@ router.get('/leaderboard', authMiddleware, async (req, res) => {
     try {
         const { User } = await import('../models/userModel.js');
         const users = await User.find({ role: { $ne: 'admin' } }).select('firstName lastName');
-        const teams = await FantasyTeam.find().populate('user', 'firstName lastName').populate('match', 'season matchNumber');
+        const teams = await FantasyTeam.find().populate('user', 'firstName lastName').populate('match', 'season matchNumber status');
  
         const userMap = {};
         teams .forEach(team => {    
+            if(team.match?.status !== 'finished') return; 
                 const userId = team.user._id.toString();
             if (!userMap[userId]) {
                 userMap[userId] = {

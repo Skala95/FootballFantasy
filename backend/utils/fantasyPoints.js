@@ -144,6 +144,31 @@ export const recalculateStats = async (match) => {
             ...match.team2.map(p => ({ player: p, team: 'team2' }))
         ];
 
+        // Igraci koji su bili u mecu (imaju matchStats snapshot) ali vise nisu u timu posle azuriranja
+        const currentPlayerIds = new Set(allPlayers.map(({ player: p }) => (p._id || p).toString()));
+        const removedPlayers = await Player.find({ 'matchStats.match': match._id });
+
+        for (const pd of removedPlayers) {
+            if (currentPlayerIds.has(pd._id.toString())) continue; 
+
+            const oldStats = pd.matchStats.find(ms => ms.match.toString() === match._id.toString());
+            if (!oldStats) continue;
+
+            await Player.findByIdAndUpdate(pd._id, {
+                $inc: {
+                    appearances: oldStats? 0: 1,
+                    goals: -oldStats.goals,
+                    assists: -oldStats.assists,
+                    ownGoals: -oldStats.ownGoals,
+                    wins: -oldStats.win,
+                    losses: -oldStats.loss,
+                    draws: -oldStats.draw,
+                    totalPoints: -oldStats.points
+                },
+                $pull: { matchStats: { match: match._id } }
+            });
+        }
+
     for (const { player, team } of allPlayers) {
         const playerId = (player._id || player).toString();
 
@@ -164,10 +189,10 @@ export const recalculateStats = async (match) => {
 
         let pts = 1 + win * 3 + goals * 5 + assists * 2 - ownGoals;
 
-        const player = await Player.findById(playerId);
-        if(!player) continue;
+        const pd = await Player.findById(playerId);
+        if(!pd) continue;
 
-        const oldStats = player.matchStats.find(ms => ms.match.toString() === match._id.toString());
+        const oldStats = pd.matchStats.find(ms => ms.match.toString() === match._id.toString());
 
         const oldGoals = oldStats?.goals ?? 0;
         const oldAssists = oldStats?.assists ?? 0;

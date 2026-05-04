@@ -15,7 +15,7 @@ function StatisticsPage() {
         }
     };
 
-    const sortedPlayers = [...players].sort((a, b) => {
+    const sortedPlayers = [...players].filter(p => p.appearances > 0).sort((a, b) => {
         if (sortDirection === "desc") return b[sortField] - a[sortField];
         return a[sortField] - b[sortField];
     });
