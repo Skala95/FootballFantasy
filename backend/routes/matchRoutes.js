@@ -111,17 +111,13 @@ router.put('/:id/status', authMiddleware, async (req, res) => {
 // Delete - brisanje termina
 router.delete('/:id', authMiddleware, async (req, res) => {
     try {
-        const match = await Match.findByIdAndDelete(req.params.id)
-        .populate('team1')
-        .populate('team2')
-        .populate('stats.player');
-    ;
+        const match = await Match.findById(req.params.id)
+            .populate('team1')
+            .populate('team2')
+            .populate('stats.player');
         if (!match) return res.status(404).json({ message: 'Termin nije pronadjen' });
-        
-        if(match.status === 'finished') {
-            await removeMatchStats(match);
-        }
 
+        await removeMatchStats(match);
         await Match.findByIdAndDelete(req.params.id);
         res.status(200).json({ message: 'Termin obrisan' });
     } catch (error) {
