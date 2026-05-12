@@ -25,6 +25,9 @@ router.post('/', authMiddleware, async (req, res) => {
 
         const matchDate = new Date(date);
         const registrationDeadline = new Date(matchDate.getTime() - 15 * 60 * 1000);
+        if (registrationDeadline <= new Date()) {
+            return res.status(400).json({ message: 'Datum termina mora biti najmanje 15 minuta u budućnosti.' });
+        }
 
         const seasonStr = String(season);
         const lastMatch = await Match.findOne({ season: seasonStr }).sort({ matchNumber: -1 });

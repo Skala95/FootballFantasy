@@ -156,7 +156,7 @@ export const recalculateStats = async (match) => {
 
             await Player.findByIdAndUpdate(pd._id, {
                 $inc: {
-                    appearances: oldStats? 0: 1,
+                    appearances: -1,
                     goals: -oldStats.goals,
                     assists: -oldStats.assists,
                     ownGoals: -oldStats.ownGoals,
@@ -205,6 +205,7 @@ export const recalculateStats = async (match) => {
 
         await Player.findByIdAndUpdate(playerId, {
             $inc: {
+                appearances: oldStats ? 0 : 1,
                 goals: goals - oldGoals,
                 assists: assists - oldAssists,
                 ownGoals: ownGoals - oldOwnGoals,
