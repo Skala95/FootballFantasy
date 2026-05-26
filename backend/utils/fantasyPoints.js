@@ -1,5 +1,6 @@
 import { FantasyTeam } from "../models/fantasyTeamModel.js";
 
+// funkcija koja iz sttistike racuna rezultat meca 
 const getMatchResult = (match) => {
     let goalsTeam1 = 0, goalsTeam2 = 0;
 
@@ -21,6 +22,7 @@ const getMatchResult = (match) => {
     return { goalsTeam1, goalsTeam2, winnerTeam };
 };
 
+// racunanje fantazi poena 
 export const calculateFantasyPoints = async (match) => {
     const fantasyTeams = await FantasyTeam.find({ match: match._id })
         .populate('selectedPlayers')
@@ -84,6 +86,7 @@ export const calculateFantasyPoints = async (match) => {
     }
 };
 
+// azurira statistiku igraca 
 export const updatePlayerStats = async (match) => {
     const { Player } = await import('../models/playerModel.js');
 
@@ -136,6 +139,7 @@ export const updatePlayerStats = async (match) => {
     }
 };
 
+// rekalkulacija statistike igraca
 export const recalculateStats = async (match) => {
     const { Player } = await import('../models/playerModel.js');
     const {winnerTeam} = getMatchResult(match);
@@ -144,7 +148,7 @@ export const recalculateStats = async (match) => {
             ...match.team2.map(p => ({ player: p, team: 'team2' }))
         ];
 
-        // Igraci koji su bili u mecu (imaju matchStats snapshot) ali vise nisu u timu posle azuriranja
+        // provera da li su neki igraci uklonjeni iz meca i azuriranje njihove statistike
         const currentPlayerIds = new Set(allPlayers.map(({ player: p }) => (p._id || p).toString()));
         const removedPlayers = await Player.find({ 'matchStats.match': match._id });
 
@@ -226,6 +230,7 @@ export const recalculateStats = async (match) => {
     await calculateFantasyPoints(match);
 };
 
+// brisanje statistike meca
 export const removeMatchStats = async (match) => {
     const { Player } = await import('../models/playerModel.js');
 
