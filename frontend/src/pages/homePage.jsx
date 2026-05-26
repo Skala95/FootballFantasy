@@ -16,37 +16,44 @@ function HomePage() {
         const headers = { Authorization: `Bearer ${token}` };
         
 
-        // Sledeca utakmica (najbliza open)
-        axios.get("/api/matches", { headers })
-            .then(res => {
-                const openMatches = res.data
+        const fetchData = async () => {
+            try {
+                // Sledeca utakmica (najbliza open)
+                const matchesRes = await axios.get("/api/matches", { headers });
+                const openMatches = matchesRes.data
                     .filter(m => m.status === "open")
                     .sort((a, b) => new Date(a.date) - new Date(b.date));
                 setNextMatch(openMatches[0] || null);
-            })
-            .catch(err => console.error("Greška pri dohvatanju utakmica:", err));
+            } catch (err) {
+                console.error("Greška pri dohvatanju utakmica:", err);
+            }
 
-        // Rang i poeni korisnika
-        axios.get("/api/fantasy-teams/leaderboard", { headers })
-            .then(res => {
-                const idx = res.data.findIndex(u => String(u.userId) === String(userData?._id));
+            try {
+                // Rang i poeni korisnika
+                const leaderboardRes = await axios.get("/api/fantasy-teams/leaderboard", { headers });
+                const idx = leaderboardRes.data.findIndex(u => String(u.userId) === String(userData?._id));
                 if (idx !== -1) {
                     setMyRank(idx + 1);
-                    setMyTotalPoints(res.data[idx].totalPoints);
+                    setMyTotalPoints(leaderboardRes.data[idx].totalPoints);
                 } else {
                     setMyRank(null);
                     setMyTotalPoints(0);
                 }
-            })
-            .catch(err => console.error("Greška pri dohvatanju leaderboard-a:", err));
+            } catch (err) {
+                console.error("Greška pri dohvatanju leaderboard-a:", err);
+            }
 
-        // Top 3 igraci po totalPoints
-        axios.get("/api/players")
-            .then(res => {
-                const sorted = [...res.data].sort((a, b) => b.totalPoints - a.totalPoints);
+            try {
+                // Top 3 igraci po totalPoints
+                const playersRes = await axios.get("/api/players");
+                const sorted = [...playersRes.data].sort((a, b) => b.totalPoints - a.totalPoints);
                 setTopPlayers(sorted.slice(0, 3));
-            })
-            .catch(err => console.error("Greška pri dohvatanju igraca:", err));
+            } catch (err) {
+                console.error("Greška pri dohvatanju igraca:", err);
+            }
+        };
+
+        fetchData();
     }, [userData]);
 
     const medalColors = ["text-yellow-500", "text-gray-400", "text-amber-600"];

@@ -133,7 +133,7 @@ function AdminPage() {
                     </button>                    
                 </form>
             </div>
-                        {/* Dugme za brisanje */}
+            {/* Dugme za brisanje */}
             <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
                 <h3 className="text-xl font-bold mb-4">Brisanje igrača</h3>
                 <button

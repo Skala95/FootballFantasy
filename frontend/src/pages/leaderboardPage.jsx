@@ -22,14 +22,18 @@ function LeaderboardPage() {
     });
 
     useEffect(() => {
-        axios.get("/api/fantasy-teams/leaderboard", {
-            headers: { Authorization: `Bearer ${token}` }
-        }).then(
-          res => {
-            console.log("Leaderboard data:", res.data); 
-            setLeaderboard(res.data);
-          }
-        ).catch(err => console.error(err));
+        const fetchLeaderboard = async () => {
+            try {
+                const res = await axios.get("/api/fantasy-teams/leaderboard", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                console.log("Leaderboard data:", res.data);
+                setLeaderboard(res.data);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchLeaderboard();
     }, []);
 
     return (

@@ -14,24 +14,22 @@ function DashboardPage() {
             navigate("/");
             return;
         }
-        console.log('Saljem request na /api/auth/me');
-        //Dohvata podatke o korisniku
-        axios.get("/api/auth/me", {
-        //axios.get("http://localhost:8080/api/auth/me", {
-            headers: {
-                Authorization: `Bearer ${token}`
+        const fetchUser = async () => {
+            try {
+                console.log('Saljem request na /api/auth/me');
+                const response = await axios.get("/api/auth/me", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setUserData(response.data);
+                console.log('USER DATA:', response.data);
+                console.log('ROLE:', response.data.role);
+            } catch (error) {
+                console.error("Greška prilikom dohvatanja korisničkih podataka:", error);
+                localStorage.removeItem("token");
+                navigate("/");
             }
-        })
-        .then(response => {
-            setUserData(response.data);
-            console.log('USER DATA:', response.data);  
-            console.log('ROLE:', response.data.role);
-        })
-        .catch(error => {
-            console.error("Greška prilikom dohvatanja korisničkih podataka:", error);
-            localStorage.removeItem("token");
-            navigate("/");
-        });
+        };
+        fetchUser();
     }, [navigate]);
 
     const handleLogout = () => {

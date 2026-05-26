@@ -22,9 +22,15 @@ function StatisticsPage() {
     });
 
     useEffect(() => {
-        axios.get("/api/players")
-            .then(response => setPlayers(response.data))
-            .catch(error => console.error("Greska:", error));
+        const fetchPlayers = async () => {
+            try {
+                const response = await axios.get("/api/players");
+                setPlayers(response.data);
+            } catch (error) {
+                console.error("Greska:", error);
+            }
+        };
+        fetchPlayers();
     }, []);
 
     return (
