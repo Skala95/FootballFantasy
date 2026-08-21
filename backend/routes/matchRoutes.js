@@ -122,6 +122,18 @@ router.delete('/:id', authMiddleware, async (req, res) => {
 
         await removeMatchStats(match);
         await Match.findByIdAndDelete(req.params.id);
+
+        // Smanji matchNumber za 1 svim narednim terminima u istoj sezoni
+        const laterMatches = await Match.find({
+            season: match.season,
+            matchNumber: { $gt: match.matchNumber }
+        }).sort({ matchNumber: 1 }); 
+
+        for (const m of laterMatches) {
+            m.matchNumber -= 1;
+            await m.save();
+        }
+
         res.status(200).json({ message: 'Termin obrisan' });
     } catch (error) {
         res.status(500).json({ message: 'Greška na serveru' });

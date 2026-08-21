@@ -49,6 +49,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
         res.status(200).json({ message: 'Igrač je obrisan' });
     } catch (error) {
         res.status(500).json({ message: 'Greška na serveru' });
+        console.error('Greška prilikom brisanja igrača:', error);
     }
 });
 export default router;

@@ -12,6 +12,7 @@ function FantasyTeamPage() {
     const [captain, setCaptain] = useState(null);
     const [myTeam, setMyTeam] = useState(null);
     const [myClosedTeams, setMyClosedTeams] = useState({});
+    const [myOpenTeams, setMyOpenTeams] = useState({});
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
     const [viewMode, setViewMode] = useState(false);
@@ -24,9 +25,23 @@ function FantasyTeamPage() {
 
     const fetchMatches = async () => {
         const res = await axios.get("/api/matches");
-        setMatches(res.data.filter(m => m.status === "open"));
+        const open = res.data.filter(m => m.status === "open");
+        setMatches(open);
         const closed = res.data.filter(m => m.status === "closed" || m.status === "finished");
         setClosedMatches(closed);
+
+        // Dohvati fantasy timove za otvorene termine
+        const openTeamsMap = {};
+        for (const m of open) {
+            try {
+                const r = await axios.get(`/api/fantasy-teams/${m._id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (r.data) openTeamsMap[m._id] = r.data;
+            } catch {}
+        }
+        setMyOpenTeams(openTeamsMap);
+
         // Dohvati fantasy timove za zatvorene termine
         const teamsMap = {};
         for (const m of closed) {
@@ -77,6 +92,11 @@ function FantasyTeamPage() {
     const handleSelectMatch = async (match, view = false) => {
         setMessage("");
         setError("");
+        // Toggle - ako je isti match i isti mod, zatvori
+        if (selectedMatch?._id === match._id && viewMode === view) {
+            setSelectedMatch(null);
+            return;
+        }
         setViewMode(view);
         await fetchMyTeam(match._id);
         setSelectedMatch(match);
@@ -125,7 +145,7 @@ function FantasyTeamPage() {
                 setMessage("Fantazi tim uspešno kreiran!");
             }
             setError("");
-            fetchMyTeam(selectedMatch._id);
+            fetchMatches();
             setSelectedMatch(null); // zatvori tabelu nakon prijave
         } catch (err) {
             setError("Došlo je do greške prilikom čuvanja fantazi tima");
@@ -150,7 +170,7 @@ function FantasyTeamPage() {
                 ) : (
                     <div className="flex flex-wrap gap-3">
                         {matches.map(m => {
-                            const hasTeam = myTeam && myTeam.match?._id === m._id || myTeam && myTeam.match === m._id;
+                            const hasTeam = !!myOpenTeams[m._id];
                             return (
                                 <div key={m._id} className="flex items-center gap-2">
                                     <span className="px-3 py-2 bg-gray-100 rounded">
@@ -159,7 +179,7 @@ function FantasyTeamPage() {
                                     {hasTeam && (
                                         <button
                                             onClick={() => handleSelectMatch(m, true)}
-                                            className="px-4 py-2 rounded text-white bg-yellow-400 hover:bg-yellow-500">
+                                            className={`px-4 py-2 rounded text-white ${selectedMatch?._id === m._id && viewMode ? 'bg-gray-400' : 'bg-yellow-400 hover:bg-yellow-500'}`}>
                                             Pregled
                                         </button>
                                     )}
