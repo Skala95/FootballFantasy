@@ -71,7 +71,7 @@ const DrawerNavigator = () => {
                         }}
                         style={{ backgroundColor: '#ef4444', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6, marginRight: 8 }}
                     >
-                        <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 13 }}>Logout</Text>
+                        <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 13 }}>Odjavi se</Text>
                     </TouchableOpacity>
                 ),
             })}

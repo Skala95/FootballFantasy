@@ -54,7 +54,7 @@ function DashboardPage() {
                     onClick={handleLogout}
                     className="bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded transition"
                 >
-                    Logout
+                    Odjavi se
                 </button>
             </div>
 

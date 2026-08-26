@@ -19,7 +19,7 @@ export default function AdminScreen() {
               activeTab === 'players' && styles.activeTabText,
             ]}
           >
-            Igrači
+            Upravljanje Igračima
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -32,7 +32,7 @@ export default function AdminScreen() {
               activeTab === 'matches' && styles.activeTabText,
             ]}
           >
-            Termini
+            Upravljanje Terminima
           </Text>
         </TouchableOpacity>
       </View>

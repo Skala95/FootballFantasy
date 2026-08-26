@@ -31,7 +31,7 @@ const FantasyTeamScreen = () => {
       const res = await request('get', '/matches');
       const open = res.filter(m => m.status === 'open');
       setMatches(open);
-      const closed = res.filter(m => m.status === 'closed' || m.status === 'finished').sort((a, b) => new Date(b.date) - new Date(a.date));
+      const closed = res.filter(m => m.status === 'closed' || m.status === 'finished');
       setClosedMatches(closed);
 
       // Dohvati timove za otvorene termine

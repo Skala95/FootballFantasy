@@ -804,7 +804,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#22c55e',
   },
   statusClosed: {
-    backgroundColor: '#eab308',
+    backgroundColor: '#3b82f6',
   },
   statusFinished: {
     backgroundColor: '#6b7280',

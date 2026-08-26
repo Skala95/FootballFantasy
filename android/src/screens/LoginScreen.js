@@ -42,7 +42,7 @@ const LoginScreen = ({ navigation }) => {
                     <Text style={styles.buttonText}>Prijavi se</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('Register')} style={styles.registerLink}>
-                    <Text style={styles.registerText}>Nemate nalog? <Text style={styles.registerBold}>Registrujte se</Text></Text>
+                    <Text style={styles.registerText}>Nemate nalog? <Text style={styles.registerBold}>Registrujte se ovde</Text></Text>
                 </TouchableOpacity>
             </View>
         </View>

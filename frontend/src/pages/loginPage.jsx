@@ -34,7 +34,7 @@ function LoginUser() {
             {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
             <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
             <input type="password" placeholder="Lozinka" value={password} onChange={(e) => setPassword(e.target.value)} />
-            <button type="submit">Prijava</button>
+            <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">Prijavi se</button>
         </form>
     );
 }

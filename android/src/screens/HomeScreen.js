@@ -1,6 +1,7 @@
 import React from "react";
-import {useState, useEffect} from "react";
+import {useState, useEffect, useCallback} from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import request from "../api/api";
 
 const medals = ['🥇', '🥈', '🥉'];
@@ -13,8 +14,7 @@ const HomeScreen = ({navigation}) => {
     const [topPlayers, setTopPlayers] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchData = async () => {
+    const fetchData = useCallback(async () => {
             let user = null;
             try {
                 user = await request("get", "/auth/me");
@@ -53,10 +53,13 @@ const HomeScreen = ({navigation}) => {
                 console.error("Greška pri dohvatanju igrača:", err);
             }
             setLoading(false);
-        };
+    }, []);
 
-        fetchData();
-    },[]);
+    useFocusEffect(
+        useCallback(() => {
+            fetchData();
+        }, [fetchData])
+    );
 
     if (loading) {
         return (
