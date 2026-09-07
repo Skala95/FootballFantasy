@@ -50,6 +50,10 @@ export const calculateFantasyPoints = async (match) => {
                 if ((winnerTeam === 'team1' && playerInTeam1) || (winnerTeam === 'team2' && playerInTeam2)) {
                     playerPoints += 3;
                 }
+                // Neresen mec (1 bod)
+                else if (winnerTeam === null) {
+                    playerPoints += 1;
+                }
 
                 match.stats.forEach(s => {
                     if((s.player?._id ? s.player._id : s.player).toString() === playerId) {
