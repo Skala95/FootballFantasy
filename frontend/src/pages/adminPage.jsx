@@ -1,4 +1,4 @@
-import PlayerAdminPage from "./PlayerAdminPage";
+import PlayerAdminPage from "./playerAdminPage";
 import MatchAdminPage from "./matchAdminPage";
 
 function AdminPage() {
